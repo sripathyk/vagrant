@@ -1,0 +1,68 @@
+# -*- mode: ruby -*-
+# vi: set ft=ruby :
+
+require_relative 'config.rb'
+include MyVars
+
+Vagrant.configure("2") do |config|
+    config.vm.box = "hashicorp/bionic64"
+
+    # Host machine (alice)
+    config.vm.define HOST1 do |vmConfig|
+        vmConfig.vm.network "private_network", ip: "21.0.1.10", virtualbox__intnet: "vnet21"
+	vmConfig.vm.hostname = HOST1
+	vmConfig.vm.provision "shell", path: "script.sh"
+
+        vmConfig.vm.provider "virtualbox" do |vb|
+            # we dont need much for this VM
+            vb.memory = "512"
+            vb.cpus = 1
+            vb.name = HOST1
+            vb.linked_clone = true
+        end
+    end
+
+    # gateway machine (moon)
+    config.vm.define GW1 do |vmConfig|
+        vmConfig.vm.network "private_network", ip: "21.0.1.11", virtualbox__intnet: "vnet21"
+        vmConfig.vm.network "private_network", ip: "100.0.1.11", virtualbox__intnet: "vnet100"
+	vmConfig.vm.hostname = GW1
+	vmConfig.vm.provision "shell", path: "script.sh"
+
+        vmConfig.vm.provider "virtualbox" do |vb|
+            vb.memory = "512"
+            vb.cpus = 1
+            vb.name = GW1
+            vb.linked_clone = true
+        end
+    end
+
+    # gateway machine (sun)
+    config.vm.define GW2 do |vmConfig|
+        vmConfig.vm.network "private_network", ip: "100.0.1.12", virtualbox__intnet: "vnet100"
+        vmConfig.vm.network "private_network", ip: "22.0.1.12", virtualbox__intnet: "vnet22"
+	vmConfig.vm.hostname = GW2
+	vmConfig.vm.provision "shell", path: "script.sh"
+
+        vmConfig.vm.provider "virtualbox" do |vb|
+            vb.memory = "512"
+            vb.cpus = 1
+            vb.name = GW2
+            vb.linked_clone = true
+        end
+    end
+
+    # host machine (bob)
+    config.vm.define HOST2 do |vmConfig|
+        vmConfig.vm.network "private_network", ip: "22.0.1.10", virtualbox__intnet: "vnet22"
+	vmConfig.vm.hostname = HOST2
+	vmConfig.vm.provision "shell", path: "script.sh"
+
+        vmConfig.vm.provider "virtualbox" do |vb|
+            vb.memory = "512"
+            vb.cpus = 1
+            vb.name = HOST2
+            vb.linked_clone = true
+        end
+    end
+end
